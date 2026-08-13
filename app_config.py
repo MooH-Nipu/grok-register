@@ -10,6 +10,7 @@ DEFAULT_CONFIG = {
     "duckmail_api_key": "",
     "cloudflare_api_base": "",
     "cloudflare_api_key": "",
+    "cloudflare_site_password": "",
     "cloudflare_auth_mode": "none",
     "cloudflare_path_domains": "/api/domains",
     "cloudflare_path_accounts": "/api/new_address",

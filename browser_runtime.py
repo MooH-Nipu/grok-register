@@ -3,6 +3,14 @@ import os
 import urllib.parse
 
 from DrissionPage import ChromiumOptions
+
+_BROWSER_CANDIDATES = (
+    os.path.expanduser("~/.local/opt/chrome-for-testing/chrome-linux64/chrome"),
+    "/usr/bin/chromium",
+    "/usr/bin/chromium-browser",
+    "/usr/bin/google-chrome",
+    "/usr/bin/google-chrome-stable",
+)
 from curl_cffi import requests
 from cpa_xai.proxyutil import (
     LocalAuthProxyBridge,
@@ -159,10 +167,26 @@ def apply_browser_proxy_option(options, proxy):
         options.set_argument("--proxy-server", proxy)
 
 
-def create_browser_options(browser_proxy="", extension_path=None):
+def create_browser_options(browser_proxy="", extension_path=None, headless=False):
     options = ChromiumOptions()
+    for candidate in _BROWSER_CANDIDATES:
+        if os.path.isfile(candidate) and os.access(candidate, os.X_OK):
+            options.set_browser_path(candidate)
+            break
     options.auto_port()
     options.set_timeouts(base=1)
+    # Linux servers: no root sandbox; headless=True only when explicitly asked.
+    # Headless Chrome gets hard-blocked by Cloudflare on x.ai — headed under
+    # Xvfb passes. Use options.headless() (not set_argument) so DrissionPage's
+    # is_headless flag matches the real browser state, else it quits+restarts
+    # and the websocket browser id goes stale -> DevTools handshake 404.
+    options.headless(headless)
+    options.set_argument("--no-sandbox")
+    options.set_argument("--disable-gpu")
+    options.set_argument("--disable-dev-shm-usage")
+    options.set_argument("--no-first-run")
+    options.set_argument("--disable-background-networking")
+    options.set_argument("--window-size=1280,900")
     apply_browser_proxy_option(options, browser_proxy)
     effective_extension = _extension_path if extension_path is None else str(extension_path or "")
     if effective_extension and os.path.exists(effective_extension):

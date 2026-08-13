@@ -84,6 +84,9 @@ def cloudflare_build_headers(content_type=False):
             headers["x-admin-auth"] = key
         elif mode != "none":
             headers["Authorization"] = f"Bearer {key}"
+    site_pw = get_cloudflare_site_password()
+    if site_pw:
+        headers["x-custom-auth"] = site_pw
     return headers
 
 def cloudflare_create_account(api_base, address, password, api_key=None, expires_in=0):
@@ -141,6 +144,9 @@ def cloudflare_get_domains(api_base, api_key=None):
 
 def cloudflare_get_message_detail(api_base, token, message_id):
     headers = {"Authorization": f"Bearer {token}"}
+    site_pw = get_cloudflare_site_password()
+    if site_pw:
+        headers["x-custom-auth"] = site_pw
     candidates = [
         f"{api_base}/api/mail/{message_id}",
         f"{api_base}{get_cloudflare_path('cloudflare_path_messages', '/messages')}/{message_id}",
@@ -165,6 +171,9 @@ def cloudflare_get_message_detail(api_base, token, message_id):
 
 def cloudflare_get_messages(api_base, token):
     headers = {"Authorization": f"Bearer {token}"}
+    site_pw = get_cloudflare_site_password()
+    if site_pw:
+        headers["x-custom-auth"] = site_pw
     path = get_cloudflare_path("cloudflare_path_messages", "/messages")
     params = {"limit": 20, "offset": 0}
     params = cloudflare_apply_auth_params(params)
@@ -521,6 +530,9 @@ def get_cloudflare_api_base():
 
 def get_cloudflare_api_key():
     return config.get("cloudflare_api_key", "")
+
+def get_cloudflare_site_password():
+    return config.get("cloudflare_site_password", "")
 
 def get_cloudflare_auth_mode():
     return str(config.get("cloudflare_auth_mode", "none") or "none").lower()
