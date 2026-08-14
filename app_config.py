@@ -114,7 +114,7 @@ def validate_config_structure(raw):
     )
     for key in bool_keys:
         cfg[key] = _require_bool(cfg, key)
-    cfg["register_count"] = _require_int(cfg, "register_count", 1, 2500)
+    cfg["register_count"] = _require_int(cfg, "register_count", 1, 10000)
     cfg["multi_thread_workers"] = _require_int(cfg, "multi_thread_workers", 1, 8)
     cfg["proxy_pool_refresh_interval_sec"] = _require_int(cfg, "proxy_pool_refresh_interval_sec", 0, 86400)
     cfg["proxy_pool_probe_interval_sec"] = _require_int(cfg, "proxy_pool_probe_interval_sec", 0, 86400)
